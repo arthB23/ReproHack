@@ -9,4 +9,9 @@ pipx ensurepath
 pipx install snakemake
 pipx install damona
 
-source ~/.bashrc
+source ~/.bashrc 
+
+exit 
+
+# relaunch ssh
+
