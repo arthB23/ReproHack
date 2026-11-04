@@ -14,4 +14,9 @@ source ~/.bashrc
 exit 
 
 # relaunch ssh
-
+damona
+damona search sra
+mkdir -p ~/test_download && cd ~/test_download
+apptainer pull sratoolkit.img https://zenodo.org/record/10894351/files/sratoolkit_3.1.0.img
+apptainer exec sratoolkit.img fasterq-dump --threads 4 --progress SRR10379726
+ls -lh
