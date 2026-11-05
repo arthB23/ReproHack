@@ -4,7 +4,8 @@ rule all:
     input:
         expand("data/fastq/{sample}.fastq.gz", sample=config["samples"]),
         "data/reference/reference.fasta",
-        "data/reference/reference.gff"
+        "data/reference/reference.gff",
+        expand("data/reference/bowtie_index/reference.{ext}.ebwt", ext=["1", "2", "3", "4", "rev.1", "rev.2"])
 
 rule download_fastq:
     output: "data/fastq/{sample}.fastq.gz"
@@ -31,4 +32,13 @@ rule download_annotation:
     shell:
         """
         wget -O {output} "https://www.ncbi.nlm.nih.gov/sviewer/viewer.cgi?db=nuccore&report=gff3&id=CP000253.1" > {log} 2>&1
+        """
+rule bowtie_index:
+    input: "data/reference/reference.fasta"
+    output: expand("data/reference/bowtie_index/reference.{ext}.ebwt", ext=["1", "2", "3", "4", "rev.1", "rev.2"])
+    log: "logs/bowtie_index.log"
+    container: "containers/bowtie_0.12.7.img"
+    shell:
+        """
+        bowtie-build {input} data/reference/bowtie_index/reference > {log} 2>&1
         """
