@@ -37,5 +37,5 @@ rule cutadapt:
     input: "data/fastq/{sample}.fastq.gz"
     output: "data/fastq/{sample}.trimmed.fastq.gz"
     log: "logs/cutadapt/{sample}.log"
-    container: "TOUMI METS L IMAGE !!!"
+    container: "https://zenodo.org/records/18834062/files/cutadapt_4.6.0.img"
     shell:"""cutadapt -q 20 -m 25 -a AGATCGGAAGAGC -o {output} {input} > {log} 2>&1"""
