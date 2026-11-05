@@ -2,7 +2,7 @@ configfile: "config.yaml"
 
 rule all:
     input:
-        expand("data/fastq/{sample}.fastq.gz", sample=config["samples"]),
+        expand("data/fastq/{sample}.trimmed.fastq.gz", sample=config["samples"]),
         "data/reference/reference.fasta",
         "data/reference/reference.gff"
 
@@ -32,3 +32,10 @@ rule download_annotation:
         """
         wget -O {output} "https://www.ncbi.nlm.nih.gov/sviewer/viewer.cgi?db=nuccore&report=gff3&id=CP000253.1" > {log} 2>&1
         """
+
+rule cutadapt:
+    input: "data/fastq/{sample}.fastq.gz"
+    output: "data/fastq/{sample}.trimmed.fastq.gz"
+    log: "logs/cutadapt/{sample}.log"
+    container: "TOUMI METS L IMAGE !!!"
+    shell:"""cutadapt -q 20 -m 25 -a AGATCGGAAGAGC -o {output} {input} > {log} 2>&1"""
