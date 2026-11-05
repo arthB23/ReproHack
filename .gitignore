@@ -1,0 +1,5 @@
+data/
+logs/
+.snakemake/
+*.img
+*.sif
