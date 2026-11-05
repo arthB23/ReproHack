@@ -20,3 +20,6 @@ mkdir -p ~/test_download && cd ~/test_download
 apptainer pull sratoolkit.img https://zenodo.org/record/10894351/files/sratoolkit_3.1.0.img
 apptainer exec sratoolkit.img fasterq-dump --threads 4 --progress SRR10379726
 ls -lh
+
+# .img creation 
+apptainer build containers/bowtie_0.12.7.img containers/Singularity.bowtie_0.12.7
