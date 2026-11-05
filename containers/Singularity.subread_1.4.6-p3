@@ -1,0 +1,18 @@
+Bootstrap: docker
+From: ubuntu:22.04
+
+%post
+    apt-get update
+    apt-get install -y wget ca-certificates
+    cd /opt
+    wget -q -O subread.tar.gz https://sourceforge.net/projects/subread/files/subread-1.4.6-p3/subread-1.4.6-p3-Linux-x86_64.tar.gz/download
+    tar -xzf subread.tar.gz
+    rm subread.tar.gz
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+%environment
+    export PATH=/opt/subread-1.4.6-p3-Linux-x86_64/bin:$PATH
+    export LANG=C.UTF-8
+
+%runscript
+    exec featureCounts "$@"

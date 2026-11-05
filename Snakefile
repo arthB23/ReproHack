@@ -2,7 +2,7 @@ configfile: "config.yaml"
 
 rule all:
     input:
-        expand("data/fastq/{sample}.fastq.gz", sample=config["samples"]),
+        expand("data/fastq/{sample}.trimmed.fastq.gz", sample=config["samples"]),
         "data/reference/reference.fasta",
         "data/reference/reference.gff",
         expand("data/reference/bowtie_index/reference.{ext}.ebwt", ext=["1", "2", "3", "4", "rev.1", "rev.2"])
@@ -42,3 +42,10 @@ rule bowtie_index:
         """
         bowtie-build {input} data/reference/bowtie_index/reference > {log} 2>&1
         """
+
+rule cutadapt:
+    input: "data/fastq/{sample}.fastq.gz"
+    output: "data/fastq/{sample}.trimmed.fastq.gz"
+    log: "logs/cutadapt/{sample}.log"
+    container: "https://zenodo.org/records/18834062/files/cutadapt_4.6.0.img"
+    shell:"""cutadapt -q 20 -m 25 -a AGATCGGAAGAGC -o {output} {input} > {log} 2>&1"""
