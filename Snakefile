@@ -1,5 +1,5 @@
 configfile: "config.yaml"
-
+ruleorder: cutadapt > download_fastq
 rule all:
     input:
         expand("data/fastq/{sample}.trimmed.fastq.gz", sample=config["samples"]),
