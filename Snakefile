@@ -1,5 +1,6 @@
 configfile: "config.yaml"
-
+wildcard_constraints:
+    sample="SRR[0-9]+"
 rule all:
     input:
         expand("data/fastq/{sample}.trimmed.fastq.gz", sample=config["samples"]),
