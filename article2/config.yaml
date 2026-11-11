@@ -1,1 +1,5 @@
-
+samples:
+  - SRR7657877 #control group 1 on 11 day post-infection
+  - SRR7657878 #test group 1 on 11 day post-infection
+  - SRR7657883 #control group 1 on 33 day post-infection
+  - SRR7657874 #test group 1 on 33 day post-infection
