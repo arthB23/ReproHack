@@ -1,1 +1,22 @@
+configfile:
 
+rule all:
+  input:
+
+
+
+rule download_refannot:
+  output:
+  container : container: "https://zenodo.org/record/10894351/files/sratoolkit_3.1.0.img"
+  shell:
+    """
+if [ -f $REF ];then
+  echo "Le génome de référence est déjà présent."
+else
+  wget https://ftp.ensembl.org/pub/release-100/fasta/mus_musculus/dna/Mus_musculus.GRCm38.dna.toplevel.fa.gz
+
+if [ -f $Annot ];then
+  echo "La référence d'annotation est déjà présente."
+else 
+  wget wget https://ftp.ensembl.org/pub/release-100/gff3/mus_musculus/Mus_musculus.GRCm38.100.gff3.gz
+"""
