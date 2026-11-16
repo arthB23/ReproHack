@@ -1,44 +1,107 @@
-configfile:"config.yaml"
+import csv
+
+with open("samples.csv") as f:
+  SAMPLES = [row["sample"] for row in csv.DictReader(f)]
 
 rule all:
   input:
+    expand("trimmed/{sample}_1.paired.fastq.gz", sample=SAMPLES),
+    expand("trimmed/{sample}_2.paired.fastq.gz", sample=SAMPLES),
+    "salmon_index"
 
+rule download_and_compress:
+  output:
+    r1 = temp("raw/{sample}_1.fastq.gz"),
+    r2 = temp("raw/{sample}_2.fastq.gz")
+  container:
+    "sratoolkit.img"
+  threads: 4
+  resources:
+    download_slots = 1
+  shell:
+    """
+    mkdir -p raw /tmp/{wildcards.sample}_sra
 
+    prefetch {wildcards.sample} --output-directory /tmp/{wildcards.sample}_sra
+
+    fasterq-dump /tmp/{wildcards.sample}_sra/{wildcards.sample}/{wildcards.sample}.sra \
+        --outdir /tmp/{wildcards.sample}_sra \
+        --temp /tmp/{wildcards.sample}_sra \
+        --threads {threads} \
+        --split-files
+
+    gzip -1 -c /tmp/{wildcards.sample}_sra/{wildcards.sample}_1.fastq > {output.r1}
+    gzip -1 -c /tmp/{wildcards.sample}_sra/{wildcards.sample}_2.fastq > {output.r2}
+
+    rm -rf /tmp/{wildcards.sample}_sra
+    """
+
+rule trimmomatic:
+  input:
+    r1 = "raw/{sample}_1.fastq.gz",
+    r2 = "raw/{sample}_2.fastq.gz"
+  output:
+    r1_paired = "trimmed/{sample}_1.paired.fastq.gz",
+    r1_unpaired = temp("trimmed/{sample}_1.unpaired.fastq.gz"),
+    r2_paired = "trimmed/{sample}_2.paired.fastq.gz",
+    r2_unpaired = temp("trimmed/{sample}_2.unpaired.fastq.gz")
+  log:
+    "logs/trimmomatic/{sample}.log"
+  container:
+    "trimmomatic.img"
+  threads: 4
+  shell:
+    """
+    mkdir -p trimmed logs/trimmomatic
+
+    ADAPTERS=$(find /usr /opt -name "TruSeq3-PE.fa" 2>/dev/null | head -n 1)
+
+    trimmomatic PE -threads {threads} \
+        {input.r1} {input.r2} \
+        {output.r1_paired} {output.r1_unpaired} \
+        {output.r2_paired} {output.r2_unpaired} \
+        ILLUMINACLIP:${{ADAPTERS}}:2:30:10 \
+        LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36 \
+        2> {log}
+    """
 
 rule download_refannot:
   output:
-    REF = Index/Mus_musculus.GRCm38.dna.toplevel.fa,
-    ANNOT = Index/Mus_musculus.GRCm38.100.gff3
+    REF = "Index/Mus_musculus.GRCm38.dna.toplevel.fa",
+    ANNOT = "Index/Mus_musculus.GRCm38.100.gff3"
   shell:
     """
-#DL ref 
-    mkdir Index 
+    mkdir -p Index
     wget -O {output.REF}.gz https://ftp.ensembl.org/pub/release-100/fasta/mus_musculus/dna/Mus_musculus.GRCm38.dna.toplevel.fa.gz
     gunzip -f {output.REF}.gz
 
-#DL annot
     wget -O {output.ANNOT}.gz https://ftp.ensembl.org/pub/release-100/gff3/mus_musculus/Mus_musculus.GRCm38.100.gff3.gz
     gunzip -f {output.ANNOT}.gz
-"""
+    """
 
 rule preindex:
   input:
-    ref = rule.download_refannot.output.REF,
-    annot = rule.download_refannot.output.ANNOT
+    ref = rules.download_refannot.output.REF,
+    annot = rules.download_refannot.output.ANNOT
   output:
     "Index/transcripts.fa"
   conda:
     "envs/agat.yaml"
   shell:
-  """
+    """
     agat_sp_extract_sequences.pl -g {input.annot} -f {input.ref} -t exon --merge -o {output}
-  """
+    """
+
 rule salmon_index:
-  input: 
-    transcript = Index/transcripts.fa
-  output: directory("salmon_index)"
-  container: https://zenodo.org/records/22144681/files/salmon_1.2.0.img
+  input:
+    transcript = "Index/transcripts.fa"
+  output:
+    directory("salmon_index")
+  container:
+    "salmon_1.2.0.img"
+  threads: 8
   shell:
     """
-      salmon index -t {input} --index salmon_index
+    salmon index -t {input.transcript} --index {output} -p {threads}
     """
+
