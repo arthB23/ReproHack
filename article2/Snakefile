@@ -26,7 +26,7 @@ rule preindex:
     ref = rule.download_refannot.output.REF,
     annot = rule.download_refannot.output.ANNOT
   output:
-    "Index/transcripts.fa
+    "Index/transcripts.fa"
   conda:
     "envs/agat.yaml"
   shell:
