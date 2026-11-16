@@ -7,7 +7,8 @@ rule all:
   input:
     expand("trimmed/{sample}_1.paired.fastq.gz", sample=SAMPLES),
     expand("trimmed/{sample}_2.paired.fastq.gz", sample=SAMPLES),
-    "salmon_index"
+    "salmon_index",
+    expand("quant/{sample}/quant.sf", sample=SAMPLES)
 
 rule download_and_compress:
   output:
@@ -107,8 +108,8 @@ rule salmon_index:
 
 rule salmon_quant:
   input: 
-    index = rules.salmon_index.output
-    r1 = rules.trimmomatic.output.r1_paired
+    index = rules.salmon_index.output,
+    r1 = rules.trimmomatic.output.r1_paired,
     r2 = rules.trimmomatic.output.r2_paired
   output:
     "quant/{sample}/quant.sf"
