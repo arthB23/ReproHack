@@ -1,4 +1,4 @@
-configfile:
+configfile:"config.yaml"
 
 rule all:
   input:
@@ -34,9 +34,8 @@ rule preindex:
     agat_sp_extract_sequences.pl -g {input.annot} -f {input.ref} -t exon --merge -o {output}
   """
 rule salmon_index:
-  input:
-    ref = rule.download_refannot.output.REF,
-    annot = rule.download_refannot.output.ANNOT
+  input: 
+    transcript = Index/transcripts.fa
   output:
   container: https://zenodo.org/records/22144681/files/salmon_1.2.0.img
   shell:
