@@ -36,8 +36,9 @@ rule preindex:
 rule salmon_index:
   input: 
     transcript = Index/transcripts.fa
-  output:
+  output: 
   container: https://zenodo.org/records/22144681/files/salmon_1.2.0.img
   shell:
     """
-    
+      salmon index -t {input} --index salmon_index
+    """
