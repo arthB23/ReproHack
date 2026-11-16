@@ -7,7 +7,7 @@ rule all:
 
 rule download_refannot:
   output:
-    REF = Index/Mus_musculus.GRCm38.dna.toplevel.fa
+    REF = Index/Mus_musculus.GRCm38.dna.toplevel.fa,
     ANNOT = Index/Mus_musculus.GRCm38.100.gff3
   shell:
     """
@@ -21,6 +21,18 @@ rule download_refannot:
     gunzup -f {output.ANNOT}.gz
 """
 
+rule preindex:
+  input:
+    ref = rule.download_refannot.output.REF,
+    annot = rule.download_refannot.output.ANNOT
+  output:
+    "Index/transcripts.fa
+  conda:
+    "envs/agat.yaml"
+  shell:
+  """
+    agat_sp_extract_sequences.pl -g {input.annot} -f {input.ref} -t exon --merge -o {output}
+  """
 rule salmon_index:
   input:
     ref = rule.download_refannot.output.REF,
