@@ -105,3 +105,19 @@ rule salmon_index:
     salmon index -t {input.transcript} --index {output} -p {threads}
     """
 
+rule salmon_quant:
+  input: 
+    index = rules.salmon_index.output
+    r1 = rules.trimmomatic.output.r1_paired
+    r2 = rules.trimmomatic.output.r2_paired
+  output:
+    "quant/{sample}/quant.sf"
+  params:
+    outdir = "quant/{sample}"
+  container: "salmon_1.2.0.img"
+  threads: 8
+  shell:
+    """
+    salmon quant -i {input.index} -l A -1 {input.r1} -2 {input.r2} -p {threads} --validateMappings -o {params.outdir}
+    """
+
