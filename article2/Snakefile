@@ -18,7 +18,7 @@ rule download_refannot:
 
 #DL annot
     wget -O {output.ANNOT}.gz https://ftp.ensembl.org/pub/release-100/gff3/mus_musculus/Mus_musculus.GRCm38.100.gff3.gz
-    gunzup -f {output.ANNOT}.gz
+    gunzip -f {output.ANNOT}.gz
 """
 
 rule preindex:

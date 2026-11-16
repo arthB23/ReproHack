@@ -1,0 +1,13 @@
+sample,condition,day,replicate
+SRR7657877,control,day11,1
+SRR7657876,control,day11,2
+SRR7657879,control,day11,3
+SRR7657878,infected,day11,1
+SRR7657881,infected,day11,2
+SRR7657880,infected,day11,3
+SRR7657883,control,day33,1
+SRR7657882,control,day33,2
+SRR7657875,control,day33,3
+SRR7657874,infected,day33,1
+SRR7657873,infected,day33,2
+SRR7657872,infected,day33,3
