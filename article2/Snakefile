@@ -8,7 +8,10 @@ rule all:
     expand("trimmed/{sample}_1.paired.fastq.gz", sample=SAMPLES),
     expand("trimmed/{sample}_2.paired.fastq.gz", sample=SAMPLES),
     "salmon_index",
-    expand("quant/{sample}/quant.sf", sample=SAMPLES)
+    expand("quant/{sample}/quant.sf", sample=SAMPLES),
+    "results/DESeq2_day11_infected_vs_control.csv",
+    "results/DESeq2_day33_infected_vs_control.csv",
+    "results/venn_acute_vs_chronic.png"
 
 rule download_and_compress:
   output:
@@ -120,5 +123,37 @@ rule salmon_quant:
   shell:
     """
     salmon quant -i {input.index} -l A -1 {input.r1} -2 {input.r2} -p {threads} --validateMappings -o {params.outdir}
+    """
+
+rule make_tx2gene:
+  input:
+    annot = rules.download_refannot.output.ANNOT
+  output:
+    "Index/tx2gene.csv"
+  shell:
+    """
+    awk -F'\t' 'BEGIN {{print "TXNAME,GENEID"}} !/^#/ && $9 ~ /ID=transcript:/ && $9 ~ /Parent=gene:/ {{
+      match($9, /ID=(transcript:[^;]+)/, tx)
+      match($9, /Parent=gene:([^;]+)/, gn)
+      pair = tx[1] "," gn[1]
+      if (!seen[pair]++) print pair
+    }}' {input.annot} > {output}
+    """
+
+rule deseq2:
+  input:
+    quants = expand("quant/{sample}/quant.sf", sample=SAMPLES),
+    tx2gene = rules.make_tx2gene.output,
+    meta = "sample.csv"
+  output:
+    res11 = "results/DESeq2_day11_infected_vs_control.csv",
+    res33 = "results/DESeq2_day33_infected_vs_control.csv",
+    venn_pdf = "results/venn_acute_vs_chronic.pdf",
+    venn_png = "results/venn_acute_vs_chronic.png"
+  conda:
+    "envs/deseq2.yaml"
+  shell:
+    """
+    Rscript scripts/deseq2_analysis.R
     """
 
