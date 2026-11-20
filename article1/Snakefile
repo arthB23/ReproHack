@@ -7,7 +7,7 @@ ruleorder: cutadapt > download_fastq
 
 rule all:
     input:
-        "results/MA_plot_all_genes.pdf"
+        "results/MA_plot_all_genes.pdf",
         "results/MA_plot_translation.pdf"
 
 rule download_fastq:
