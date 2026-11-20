@@ -7,7 +7,7 @@ ruleorder: cutadapt > download_fastq
 
 rule all:
     input:
-        "results/counts.txt"
+        "results/MA_plot_all_genes.pdf"
 
 rule download_fastq:
     output: "data/fastq/{sample}.fastq.gz"
@@ -82,4 +82,15 @@ rule featurecounts:
     shell:
         """
         featureCounts --extraAttributes Name -t gene -g ID -s 1 -F GTF -T {threads} -a {input.gff} -o {output} {input.bams} > {log} 2>&1
+        """
+rule deseq2:
+    input: "results/counts.txt"
+    output:
+        "results/deseq2_results.tsv",
+        "results/MA_plot_all_genes.pdf"
+    log: "logs/deseq2.log"
+    container: "containers/deseq2.img"
+    shell:
+        """
+        Rscript scripts/deseq2.R {input} results > {log} 2>&1
         """
