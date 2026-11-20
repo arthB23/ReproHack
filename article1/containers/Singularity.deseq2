@@ -1,0 +1,8 @@
+Bootstrap: docker
+From: bioconductor/bioconductor_docker:RELEASE_3_20
+
+%post
+    R -e 'BiocManager::install(c("DESeq2", "ggplot2"), ask=FALSE, update=FALSE)'
+
+%runscript
+    exec Rscript "$@"
