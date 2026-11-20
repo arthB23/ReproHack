@@ -8,6 +8,7 @@ ruleorder: cutadapt > download_fastq
 rule all:
     input:
         "results/MA_plot_all_genes.pdf"
+        "results/MA_plot_translation.pdf"
 
 rule download_fastq:
     output: "data/fastq/{sample}.fastq.gz"
@@ -93,4 +94,31 @@ rule deseq2:
     shell:
         """
         Rscript scripts/deseq2.R {input} results > {log} 2>&1
+        """
+rule kegg_translation:
+    output:
+        links="data/kegg/translation_links.tsv",
+        genes="data/kegg/sao_genes.tsv"
+    log: "logs/kegg_translation.log"
+    container: "docker://evolbioinfo/ubuntu:v24.04"
+    shell:
+        """
+        wget -q -O {output.links} https://rest.kegg.jp/link/sao/path:sao03010 2> {log}
+        wget -q -O - https://rest.kegg.jp/link/sao/path:sao00970 >> {output.links} 2>> {log}
+        wget -q -O {output.genes} https://rest.kegg.jp/list/sao 2>> {log}
+        """
+
+rule fig3c:
+    input:
+        res="results/deseq2_results.tsv",
+        links="data/kegg/translation_links.tsv",
+        genes="data/kegg/sao_genes.tsv"
+    output:
+        pdf="results/MA_plot_translation.pdf",
+        tsv="results/translation_genes.tsv"
+    log: "logs/fig3c.log"
+    container: "containers/deseq2.img"
+    shell:
+        """
+        Rscript scripts/fig3c.R {input.res} {input.links} {input.genes} {output.pdf} {output.tsv} > {log} 2>&1
         """
