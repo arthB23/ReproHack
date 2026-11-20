@@ -14,11 +14,11 @@ translation_ids <- unique(sub("^sao:", "gene-", links$V2))
 # 3. Noms courts des gènes (ex. "rplI"), pris dans la liste KEGG
 genes <- read.delim(args[3], header = FALSE, quote = "")
 genes$Geneid <- sub("^sao:", "gene-", genes$V1)
-desc <- genes[[ncol(genes)]]
+desc <- genes$V4
 genes$symbol <- ifelse(grepl(";", desc), sub(";.*", "", desc), sub("^gene-", "", genes$Geneid))
 
 # 4. Garder seulement les gènes de la traduction
-tr <- res[res$Geneid %in% translation_ids, ]
+tr <- res[res$Geneid %in% translation_ids & grepl("^gene-SAOUHSC_[0-9]+$", res$Geneid), ]
 tr$symbol <- genes$symbol[match(tr$Geneid, genes$Geneid)]
 tr$significatif <- !is.na(tr$padj) & tr$padj < 0.05
 write.table(tr, args[5], sep = "\t", quote = FALSE, row.names = FALSE)
