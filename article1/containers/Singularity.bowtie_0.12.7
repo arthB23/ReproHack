@@ -3,7 +3,7 @@ From: ubuntu:22.04
 
 %post
     apt-get update
-    apt-get install -y wget unzip ca-certificates
+    apt-get install -y wget unzip ca-certificates samtools
     cd /opt
     wget -q -O bowtie.zip https://sourceforge.net/projects/bowtie-bio/files/bowtie/0.12.7/bowtie-0.12.7-linux-x86_64.zip/download
     unzip bowtie.zip
