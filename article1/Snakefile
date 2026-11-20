@@ -81,7 +81,7 @@ rule featurecounts:
     container: "containers/subread_1.4.6-p3.img"
     shell:
         """
-        featureCounts --extraAttributes Name -t gene -g ID -s 1 -F GTF -T {threads} -a {input.gff} -o {output} {input.bams} > {log} 2>&1
+        featureCounts -t gene -g ID -s 1 -F GTF -T {threads} -a {input.gff} -o {output} {input.bams} > {log} 2>&1
         """
 rule deseq2:
     input: "results/counts.txt"
