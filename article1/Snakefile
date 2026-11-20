@@ -1,13 +1,13 @@
 configfile: "config.yaml"
+
 wildcard_constraints:
     sample="SRR[0-9]+"
+
 ruleorder: cutadapt > download_fastq
+
 rule all:
     input:
-        expand("data/fastq/{sample}.trimmed.fastq.gz", sample=config["samples"]),
-        "data/reference/reference.fasta",
-        "data/reference/reference.gff",
-        expand("data/reference/bowtie_index/reference.{ext}.ebwt", ext=["1", "2", "3", "4", "rev.1", "rev.2"])
+        "results/counts.txt"
 
 rule download_fastq:
     output: "data/fastq/{sample}.fastq.gz"
@@ -18,6 +18,7 @@ rule download_fastq:
         fasterq-dump --threads 4 --progress --outdir data/fastq {wildcards.sample} > {log} 2>&1
         gzip data/fastq/{wildcards.sample}.fastq
         """
+
 rule download_genome:
     output: "data/reference/reference.fasta"
     log: "logs/download_genome.log"
@@ -35,6 +36,7 @@ rule download_annotation:
         """
         wget -O {output} "https://www.ncbi.nlm.nih.gov/sviewer/viewer.cgi?db=nuccore&report=gff3&id=CP000253.1" > {log} 2>&1
         """
+
 rule bowtie_index:
     input: "data/reference/reference.fasta"
     output: expand("data/reference/bowtie_index/reference.{ext}.ebwt", ext=["1", "2", "3", "4", "rev.1", "rev.2"])
@@ -50,4 +52,34 @@ rule cutadapt:
     output: "data/fastq/{sample}.trimmed.fastq.gz"
     log: "logs/cutadapt/{sample}.log"
     container: "https://zenodo.org/records/18834062/files/cutadapt_4.6.0.img"
-    shell:"""cutadapt -q 20 -m 25 -a AGATCGGAAGAGC -o {output} {input} > {log} 2>&1"""
+    shell:
+        """
+        cutadapt -q 20 -m 25 -a AGATCGGAAGAGC -o {output} {input} > {log} 2>&1
+        """
+
+rule mapping:
+    input:
+        fastq="data/fastq/{sample}.trimmed.fastq.gz",
+        index=expand("data/reference/bowtie_index/reference.{ext}.ebwt", ext=["1", "2", "3", "4", "rev.1", "rev.2"])
+    output: "data/bam/{sample}.bam"
+    log: "logs/mapping/{sample}.log"
+    threads: 4
+    container: "containers/bowtie_0.12.7.img"
+    shell:
+        """
+        bowtie -p {threads} -S data/reference/bowtie_index/reference <(gunzip -c {input.fastq}) 2> {log} | samtools sort -@ {threads} > {output}
+        samtools index {output}
+        """
+
+rule featurecounts:
+    input:
+        bams=expand("data/bam/{sample}.bam", sample=config["samples"]),
+        gff="data/reference/reference.gff"
+    output: "results/counts.txt"
+    log: "logs/featurecounts.log"
+    threads: 4
+    container: "containers/subread_1.4.6-p3.img"
+    shell:
+        """
+        featureCounts --extraAttributes Name -t gene -g ID -s 1 -F GTF -T {threads} -a {input.gff} -o {output} {input.bams} > {log} 2>&1
+        """
