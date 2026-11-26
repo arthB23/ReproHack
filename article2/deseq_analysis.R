@@ -43,19 +43,19 @@ write.csv(res_day33,
           row.names = FALSE)
 
 up_day11 <- res_day11 %>%
-  filter(!is.na(padj), padj < 0.05, log2FoldChange > 1) %>%
+  filter(!is.na(padj), pvalue < 0.05, log2FoldChange > 1.5) %>%
   pull(gene_id)
 
 down_day11 <- res_day11 %>%
-  filter(!is.na(padj), padj < 0.05, log2FoldChange < -1) %>%
+  filter(!is.na(padj), pvalue < 0.05, log2FoldChange < -1.5) %>%
   pull(gene_id)
 
 up_day33 <- res_day33 %>%
-  filter(!is.na(padj), padj < 0.05, log2FoldChange > 1) %>%
+  filter(!is.na(padj), pvalue < 0.05, log2FoldChange > 1.5) %>%
   pull(gene_id)
 
 down_day33 <- res_day33 %>%
-  filter(!is.na(padj), padj < 0.05, log2FoldChange < -1) %>%
+  filter(!is.na(padj), pvalue < 0.05, log2FoldChange < -1.5) %>%
   pull(gene_id)
 
 cat(sprintf("Day 11 -> Up: %d | Down: %d\n", length(up_day11), length(down_day11)))
