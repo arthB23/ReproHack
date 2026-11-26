@@ -144,7 +144,7 @@ rule deseq2:
   input:
     quants = expand("quant/{sample}/quant.sf", sample=SAMPLES),
     tx2gene = rules.make_tx2gene.output,
-    meta = "sample.csv"
+    meta = "samples.csv"
   output:
     res11 = "results/DESeq2_day11_infected_vs_control.csv",
     res33 = "results/DESeq2_day33_infected_vs_control.csv",
