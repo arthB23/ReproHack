@@ -154,6 +154,6 @@ rule deseq2:
     "envs/deseq2.yaml"
   shell:
     """
-    Rscript scripts/deseq2_analysis.R
+    Rscript deseq2_analysis.R
     """
 
