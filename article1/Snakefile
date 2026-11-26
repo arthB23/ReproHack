@@ -8,8 +8,8 @@ ruleorder: cutadapt > download_fastq
 rule all:
     input:
         "results/MA_plot_all_genes.pdf",
-        "results/MA_plot_translation.pdf"
-
+        "results/MA_plot_translation.pdf",
+        "results/PCA.pdf"
 rule download_fastq:
     output: "data/fastq/{sample}.fastq.gz"
     log: "logs/download_fastq/{sample}.log"
@@ -121,4 +121,14 @@ rule fig3c:
     shell:
         """
         Rscript scripts/fig3c.R {input.res} {input.links} {input.genes} {output.pdf} {output.tsv} > {log} 2>&1
+        """
+
+rule pca:
+    input: "results/counts.txt"
+    output: "results/PCA.pdf"
+    log: "logs/pca.log"
+    container: "containers/deseq2.img"
+    shell:
+        """
+        Rscript scripts/pca.R {input} {output} > {log} 2>&1
         """
