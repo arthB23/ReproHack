@@ -5,7 +5,7 @@ library(tibble)
 library(ggplot2)
 library(ggVennDiagram)
 
-samples <- read.csv("sample.csv", stringsAsFactors = FALSE)
+samples <- read.csv("samples.csv", stringsAsFactors = FALSE)
 files <- file.path("quant", samples$sample, "quant.sf")
 names(files) <- samples$sample
 stopifnot(all(file.exists(files)))
