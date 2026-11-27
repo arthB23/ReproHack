@@ -19,6 +19,10 @@ txi <- tximport(files,
                 tx2gene = tx2gene,
                 ignoreTxVersion = TRUE,
                 dropInfReps=TRUE)
+#txi <- tximport(files,
+                #type = "salmon",
+                #txOut = TRUE,
+                #dropInfReps = TRUE)
 
 dds <- DESeqDataSetFromTximport(txi, colData = samples, design = ~ group)
 dds <- dds[rowSums(counts(dds)) >= 10, ]
